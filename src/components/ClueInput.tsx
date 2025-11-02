@@ -2,188 +2,308 @@
 
 import { useState, useRef, useEffect, JSX } from "react";
 import { Clue } from "@/data/puzzles";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ClueInputProps {
   clue: Clue;
 }
 
 export default function ClueInput({ clue }: ClueInputProps) {
-  const [letters, setLetters] = useState<string[]>(
-    Array(clue.solution.length).fill("")
-  );
-  const [activeIndex, setActiveIndex] = useState(0); // current active input
-  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
-
-  const [revealedHints, setRevealedHints] = useState<Set<"indicator" | "fodder" | "definition">>(new Set());
-  const [showHintMenu, setShowHintMenu] = useState(false);
-  const [activeHint, setActiveHint] = useState<null | "indicator" | "fodder" | "definition">(null);
-
-  const [solved, setSolved] = useState<boolean | null>(null);
+  const solutionWords = clue.solution.split(" ");
+  const [letters, setLetters] = useState(solutionWords.map((w) => Array(w.length).fill("")));
+  const [revealedHints, setRevealedHints] = useState<
+    Set<"indicator" | "fodder" | "definition">
+  >(new Set());
+  const [showHintPopup, setShowHintPopup] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [activePos, setActivePos] = useState<{ w: number; i: number }>({ w: 0, i: 0 });
+  
+
+  const isAnswerFilled = letters.every((word) => word.every((letter) => letter !== ""));
+  
+
+  const inputRefs = useRef<HTMLInputElement[][]>(
+    solutionWords.map((word) => Array(word.length).fill(null))
+  );
+
+  useEffect(() => {
+    inputRefs.current[0][0]?.focus();
+  }, []);
 
   const hintColors = {
-    indicator: "bg-yellow-300 text-black",
+    indicator: "bg-pink-300 text-black",
     fodder: "bg-blue-300 text-black",
     definition: "bg-green-300 text-black",
   };
 
-  useEffect(() => {
-    // Focus first blank on load
-    inputRefs.current[activeIndex]?.focus();
-  }, [activeIndex]);
+  const normalize = (s: string) => s.replace(/[^\w\s]/g, "").toLowerCase();
 
-  const handleInput = (index: number, value: string) => {
+  // ✅ Improved highlightClue — respects phrase-level matches
+  const highlightClue = (text: string) => {
+    const elements: JSX.Element[] = [];
+    let remainingText = text;
+
+    const hintTypes: ("indicator" | "fodder" | "definition")[] = [
+      "indicator",
+      "fodder",
+      "definition",
+    ];
+
+    // Helper to process hints inside a segment
+    const processHints = (segment: string) => {
+      const segElements: JSX.Element[] = [];
+      let segRemaining = segment;
+
+      while (segRemaining.length > 0) {
+        let earliestIdx = segRemaining.length;
+        let matchedType: "indicator" | "fodder" | "definition" | null = null;
+        let matchedPhrase: string | null = null;
+
+        for (const hintType of hintTypes) {
+          if (!revealedHints.has(hintType)) continue;
+
+          const phrases = Array.isArray((clue as any)[hintType])
+            ? (clue as any)[hintType]
+            : [(clue as any)[hintType]];
+
+          for (const phrase of phrases) {
+            const idx = segRemaining.toLowerCase().indexOf(phrase.toLowerCase());
+            if (idx !== -1 && idx < earliestIdx) {
+              earliestIdx = idx;
+              matchedType = hintType;
+              matchedPhrase = segRemaining.slice(idx, idx + phrase.length);
+            }
+          }
+        }
+
+        if (!matchedType || !matchedPhrase) {
+          segElements.push(<span key={Math.random()}>{segRemaining}</span>);
+          break;
+        }
+
+        if (earliestIdx > 0) {
+          segElements.push(<span key={Math.random()}>{segRemaining.slice(0, earliestIdx)}</span>);
+        }
+
+        segElements.push(
+          <span
+            key={Math.random()}
+            className={`${hintColors[matchedType]} px-1 rounded`}
+          >
+            {matchedPhrase}
+          </span>
+        );
+
+        segRemaining = segRemaining.slice(earliestIdx + matchedPhrase.length);
+      }
+
+      return segElements;
+    };
+
+    while (remainingText.length > 0) {
+      let earliestIdx = remainingText.length;
+      let matchedType: "nowrap" | "indicator" | "fodder" | "definition" | null = null;
+      let matchedPhrase: string | null = null;
+
+      // --- Check nowrap sequences ---
+      if (clue.nowrapSequences) {
+        for (const seq of clue.nowrapSequences) {
+          const idx = remainingText.toLowerCase().indexOf(seq.toLowerCase());
+          if (idx !== -1 && idx < earliestIdx) {
+            earliestIdx = idx;
+            matchedType = "nowrap";
+            matchedPhrase = seq;
+          }
+        }
+      }
+
+      // --- Check revealed hints ---
+      for (const hintType of hintTypes) {
+        if (!revealedHints.has(hintType)) continue;
+
+        const phrases = Array.isArray((clue as any)[hintType])
+          ? (clue as any)[hintType]
+          : [(clue as any)[hintType]];
+
+        for (const phrase of phrases) {
+          const idx = remainingText.toLowerCase().indexOf(phrase.toLowerCase());
+          if (idx !== -1 && idx < earliestIdx) {
+            earliestIdx = idx;
+            matchedType = hintType;
+            matchedPhrase = remainingText.slice(idx, idx + phrase.length);
+          }
+        }
+      }
+
+      // --- No match: push remaining text and break ---
+      if (!matchedType || !matchedPhrase) {
+        elements.push(<span key={Math.random()}>{remainingText}</span>);
+        break;
+      }
+
+      // --- Text before match ---
+      if (earliestIdx > 0) {
+        elements.push(
+          <span key={Math.random()}>{remainingText.slice(0, earliestIdx)}</span>
+        );
+      }
+
+      // --- Matched element ---
+      if (matchedType === "nowrap") {
+        // Wrap in whitespace-nowrap, but also highlight any revealed hints inside
+        elements.push(
+          <span key={Math.random()} className="whitespace-nowrap">
+            {processHints(matchedPhrase)}
+          </span>
+        );
+      } else {
+        elements.push(
+          <span
+            key={Math.random()}
+            className={`${hintColors[matchedType]} px-1 rounded`}
+          >
+            {matchedPhrase}
+          </span>
+        );
+      }
+
+      // --- Remove matched text from remaining ---
+      remainingText = remainingText.slice(earliestIdx + matchedPhrase.length);
+    }
+
+    return elements;
+  };
+
+  // --- Input handling ---
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, wIndex: number, i: number) => {
+    const value = e.target.value.toLowerCase().slice(-1);
     const newLetters = [...letters];
-    newLetters[index] = value.toUpperCase();
+    newLetters[wIndex][i] = value;
     setLetters(newLetters);
 
-    // Move to next input if available
-    if (value && index < letters.length - 1) {
-      setActiveIndex(index + 1);
-    }
-  };
-
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      checkAnswer();
-      return;
-    }
-
-    if (e.key === "Backspace") {
-      e.preventDefault();
-      if (letters[index]) {
-        handleInput(index, "");
-      } else if (index > 0) {
-        handleInput(index - 1, "");
-        setActiveIndex(index - 1);
+    // Move to next input
+    if (value) {
+      if (inputRefs.current[wIndex][i + 1]) {
+        setActivePos({ w: wIndex, i: i + 1 });
+        inputRefs.current[wIndex][i + 1]?.focus();
+      } else if (wIndex + 1 < inputRefs.current.length) {
+        setActivePos({ w: wIndex + 1, i: 0 });
+        inputRefs.current[wIndex + 1][0]?.focus();
       }
     }
-
-    if (e.key.length === 1 && /^[a-zA-Z]$/.test(e.key)) {
-      handleInput(index, e.key);
-    }
   };
 
-  const checkAnswer = () => {
-    const userAnswer = letters.join("").toUpperCase();
-    const correct = userAnswer === clue.solution.toUpperCase();
-    setSolved(correct);
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    wIndex: number,
+    i: number
+  ) => {
+    if (e.key === "Backspace") {
+      const newLetters = [...letters];
+      if (letters[wIndex][i]) {
+        newLetters[wIndex][i] = "";
+        setLetters(newLetters);
+        setActivePos({ w: wIndex, i });
+      } else if (i > 0) {
+        setActivePos({ w: wIndex, i: i - 1 });
+        inputRefs.current[wIndex][i - 1]?.focus();
+      } else if (wIndex > 0) {
+        const prevWord = inputRefs.current[wIndex - 1];
+        setActivePos({ w: wIndex - 1, i: prevWord.length - 1 });
+        prevWord[prevWord.length - 1]?.focus();
+      }
+    }
+    if (e.key === "Enter") handleCheck();
+  };
+
+  const handleCheck = () => {
+    const answer = letters.map((arr) => arr.join("")).join(" ");
+    const correct = normalize(answer) === normalize(clue.solution);
+    setIsCorrect(correct);
     setShowResult(true);
   };
 
-  const revealHint = (hint: "indicator" | "fodder" | "definition") => {
-    setRevealedHints(prev => new Set(prev).add(hint));
-    setActiveHint(hint);
-    setShowHintMenu(false);
+  const toggleHint = (hint: "indicator" | "fodder" | "definition") => {
+    setRevealedHints((prev) => new Set(prev).add(hint));
+    setShowHintPopup(false);
   };
 
-const highlightClue = (text: string) => {
-  type Highlight = { start: number; end: number; hint: "indicator" | "fodder" | "definition" };
-
-  const highlights: Highlight[] = [];
-  const hints: ("indicator" | "fodder" | "definition")[] = ["indicator", "fodder", "definition"];
-
-  // Build highlight ranges for each revealed hint
-  hints.forEach((hint) => {
-    if (!revealedHints.has(hint)) return;
-
-    const phrase = (clue as any)[hint];
-    if (!phrase) return;
-
-    // Regex for case-insensitive, whole word matching
-    const regex = new RegExp(`\\b${phrase}\\b`, "gi");
-    let match: RegExpExecArray | null;
-
-    while ((match = regex.exec(text)) !== null) {
-      highlights.push({ start: match.index, end: match.index + phrase.length, hint });
-    }
-  });
-
-  // Sort highlights by start index
-  highlights.sort((a, b) => a.start - b.start);
-
-  const elements: JSX.Element[] = [];
-  let cursor = 0;
-  let keyCounter = 0;
-
-  for (const hl of highlights) {
-    // Add unhighlighted text before the highlight
-    if (hl.start > cursor) {
-      elements.push(<span key={keyCounter++}>{text.slice(cursor, hl.start)}</span>);
-    }
-    // Add highlighted text
-    elements.push(
-      <span key={keyCounter++} className={hintColors[hl.hint]}>
-        {text.slice(hl.start, hl.end)}
-      </span>
-    );
-    cursor = hl.end;
-  }
-
-  // Add remaining text
-  if (cursor < text.length) {
-    elements.push(<span key={keyCounter++}>{text.slice(cursor)}</span>);
-  }
-
-  return elements;
-};
-
-
   return (
-    <div className="p-4 rounded-lg bg-neutral-800 shadow-md relative">
-      {/* Clue with highlighting */}
-      <p className="mb-4 font-medium text-lg">{highlightClue(clue.text)}</p>
-
-      {/* Letter input boxes */}
-      <div className="flex gap-2 mb-4">
-        {letters.map((letter, idx) => (
-          <input
-            key={idx}
-            type="text"
-            maxLength={1}
-            ref={(el) => {
-              inputRefs.current[idx] = el;
-            }}
-            className={`w-10 h-10 text-center rounded-md ${
-              idx === activeIndex ? "bg-yellow-200 text-black" : "bg-white text-black"
-            }`}
-            value={letter}
-            onChange={() => {}}
-            onKeyDown={(e) => handleKeyDown(idx, e)}
-          />
-        ))}
+    <div className="min-h-screen bg-purple-200">
+      {/* Center the clue horizontally */}
+      <div className="flex justify-center mb-10">
+        <div className="bg-white p-6 rounded-lg shadow-md max-w-2xl w-full text-center">
+          <p className="text-2xl font-semibold text-gray-800 leading-relaxed">
+            {highlightClue(clue.text)}
+          </p>
+        </div>
       </div>
 
-      <button
-        onClick={checkAnswer}
-        className="px-4 py-2 bg-blue-500 rounded hover:bg-blue-600"
-      >
-        Check
-      </button>
+      <div className="flex flex-col items-center gap-5">
+        <div className="flex gap-5">
+          {letters.map((word, wIndex) => (
+            <div
+              key={wIndex}
+              className="flex border-2 border-gray-900 rounded-lg overflow-hidden"
+            >
+              {word.map((letter, i) => (
+                <input
+                  key={i}
+                  ref={(el) => {
+                    if (!inputRefs.current[wIndex]) inputRefs.current[wIndex] = [];
+                    inputRefs.current[wIndex][i] = el!;
+                  }}
+                  type="text"
+                  maxLength={1}
+                  value={letter}
+                  onChange={(e) => handleChange(e, wIndex, i)}
+                  onKeyDown={(e) => handleKeyDown(e, wIndex, i)}
+                  className={`w-10 h-10 text-center text-black border-r border-gray-400 focus:outline-none text-lg font-medium caret-transparent ${
+                    activePos.w === wIndex && activePos.i === i
+                      ? "bg-blue-300 border-blue-300"
+                      : "bg-white"
+                  }`}              />
+              ))}
+            </div>
+          ))}
+        </div>
 
-      <button
-        onClick={() => setShowHintMenu(true)}
-        className="ml-4 px-3 py-1 bg-gray-600 rounded hover:bg-gray-700"
-      >
-        Hint
-      </button>
-
-      {/* Hint menu popup */}
-      {showHintMenu && (
-        <div className="absolute top-0 left-0 w-full h-full bg-black/70 flex justify-center items-center z-50">
-          <div className="bg-neutral-900 p-6 rounded-lg relative w-80 flex flex-col gap-3">
+        {/* Detached Buttons */}
+        <div className="flex gap-4 mt-2">
+          <button
+            onClick={() => setShowHintPopup(true)}
+            className="px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg shadow-md transition"
+          >
+            Hint
+          </button>
             <button
-              className="absolute top-2 right-2 text-gray-400 hover:text-white"
-              onClick={() => setShowHintMenu(false)}
+              onClick={handleCheck}
+              disabled={!isAnswerFilled}
+              className={`px-5 py-2 rounded-lg shadow-md transition 
+                ${isAnswerFilled ? "bg-green-500 hover:bg-green-600 text-white" : "bg-gray-400 text-gray-200 cursor-not-allowed"}`}
+            >
+            Check
+          </button>
+        </div>
+      </div>
+
+      {/* Hint Popup */}
+      {showHintPopup && (
+        <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg relative w-80 text-center">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-black"
+              onClick={() => setShowHintPopup(false)}
             >
               ✕
             </button>
-
+            <h3 className="text-lg font-semibold mb-4">Reveal a hint</h3>
             {(["indicator", "fodder", "definition"] as const).map((hint) => (
               <button
                 key={hint}
-                className={`px-3 py-2 rounded font-semibold ${hintColors[hint]}`}
-                onClick={() => revealHint(hint)}
+                onClick={() => toggleHint(hint)}
+                className={`block w-full my-1 px-3 py-2 rounded font-semibold ${hintColors[hint]} transition`}
               >
                 Reveal {hint}
               </button>
@@ -192,64 +312,44 @@ const highlightClue = (text: string) => {
         </div>
       )}
 
-      {/* Explanation popup */}
-      {activeHint && (
-        <div className="absolute top-0 left-0 w-full h-full bg-black/70 flex justify-center items-center z-50">
-          <div className="bg-neutral-900 p-6 rounded-lg relative w-80 flex flex-col gap-3">
-            <button
-              className="absolute top-2 right-2 text-gray-400 hover:text-white"
-              onClick={() => setActiveHint(null)}
+      <AnimatePresence>
+        {showResult && isCorrect && (
+          <div className="mt-6 w-full max-w-2xl flex flex-col items-center gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="p-6 bg-white/80 rounded-lg shadow-md text-center w-full flex flex-col items-center gap-4"
             >
-              ✕
-            </button>
+              {/* Correct message */}
+              <p className="text-xl font-bold text-green-600">✅ Correct!</p>
 
-            <p className="text-gray-300 text-sm">
-              {clue.explanation?.[activeHint] || "No explanation available."}
-            </p>
+              {/* Embedded video */}
+              <div className="w-full aspect-video">
+                <iframe
+                  src={clue.videoUrl}
+                  title="Explanation Video"
+                  className="w-full h-full rounded-lg"
+                  allowFullScreen
+                />
+              </div>
+
+              {/* Hint explanations */}
+              <div className="flex flex-col gap-2 w-full text-left">
+                <p className="text-gray-700">
+                  <span className="font-semibold">Indicator:</span> {clue.explanation.indicator}
+                </p>
+                <p className="text-gray-700">
+                  <span className="font-semibold">Fodder:</span> {clue.explanation.fodder}
+                </p>
+                <p className="text-gray-700">
+                  <span className="font-semibold">Definition:</span> {clue.explanation.definition}
+                </p>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
-
-      {/* Result block */}
-      {showResult && solved !== null && (
-        <div className="mt-4 p-4 rounded-lg bg-green-600 text-white shadow-lg animate-slide-up">
-          <p>{solved ? "Correct! 🎉" : "Not quite! 😅"}</p>
-          <div className="mt-2 flex gap-2">
-            <button
-              className="px-3 py-1 bg-blue-500 rounded hover:bg-blue-600"
-              onClick={() => {
-                navigator.clipboard.writeText(window.location.href);
-                alert("Link copied!");
-              }}
-            >
-              Share Link
-            </button>
-            <span>{solved ? "✅" : "❌"}</span>
-          </div>
-        </div>
-      )}
-
-      {showResult && solved !== null && (
-        <div className="mt-4 p-4 rounded-lg bg-neutral-800 text-white shadow-md space-y-3">
-          {/* Video block */}
-          <div className="w-full aspect-video">
-            <iframe
-              src={clue.videoUrl || ""}
-              title="Clue Explanation"
-              className="w-full h-full rounded"
-              frameBorder="0"
-              allowFullScreen
-            ></iframe>
-          </div>
-
-          {/* Explanation text */}
-          {(["indicator", "fodder", "definition"] as const).map((hint) => (
-            <p key={hint}>
-              <strong>{hint}:</strong> {clue.explanation?.[hint]}
-            </p>
-          ))}
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
     </div>
   );
