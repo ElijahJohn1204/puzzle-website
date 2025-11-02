@@ -38,7 +38,7 @@ export const puzzles: Puzzle[] = [
           fodder: "The word 'dance' is the fodder in this clue that we'll use to construct our answer, as guided by the indicator(s).",
           definition: "Our definition here is 'joy in your brain', which is a fun way to describe our answer."
         },
-        videoUrl: "https://www.youtube.com/embed/-DXvOGMsWwo",
+        videoUrl: "https://www.youtube.com/embed/JQkwk9G1FTM",
       }
     ]
   },
@@ -59,7 +59,7 @@ export const puzzles: Puzzle[] = [
           fodder: "The words 'Joe', 'Rae', and 'muy' are the fodder in this clue from which we will grab letters to form our answer, as guided by the indicator(s).",
           definition: "Our definition is 'muy inteligente pero Niko es una mujer más inteligente', which translates to 'very intelligent but Niko is a more intelligent woman'. This is a playful description of our answer."
         },
-        videoUrl: "https://www.youtube.com/embed/-DXvOGMsWwo",
+        videoUrl: "https://www.youtube.com/embed/6V2fuAjxt2U",
       }
     ]
   },
@@ -80,7 +80,7 @@ export const puzzles: Puzzle[] = [
           fodder: "The words 'disk' and 'East Raymondtown' are the fodder. We will need to manipulate these words and extract letters from them to get the answer, guided by the indicator(s).",
           definition: "Our definition here is 'Youthful pop group', which is a general description of our answer."
         },
-        videoUrl: "https://www.youtube.com/embed/-DXvOGMsWwo",
+        videoUrl: "https://www.youtube.com/embed/ggQ29VxcqRA",
         nowrapSequences: ["East Raymondtown"]
       }
     ]
@@ -102,7 +102,7 @@ export const puzzles: Puzzle[] = [
           fodder: "The words 'Catholic', 'Church', and 'Ezra' are the fodder in this clue. We will need letters from each of them to form our answer.",
           definition: "Our definition here is 'is not a butt toucher', which refers to a memorable description of our answer."
         },
-        videoUrl: "https://www.youtube.com/embed/-DXvOGMsWwo",
+        videoUrl: "https://www.youtube.com/embed/Wdng4IUnkS4",
       }
     ]
   }
