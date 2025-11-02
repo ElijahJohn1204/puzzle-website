@@ -2,8 +2,8 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Minute Cryptic",
-  description: "Quick cryptic crosswords, one a day.",
+  title: "Cryptic Puzzle Archive",
+  description: "Cryptic clues made specially for you!",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
