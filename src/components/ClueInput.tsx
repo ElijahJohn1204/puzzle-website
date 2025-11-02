@@ -34,6 +34,8 @@ export default function ClueInput({ clue }: ClueInputProps) {
     inputRefs.current[0][0]?.focus();
   }, []);
 
+  
+
   const hintColors = {
     indicator: "bg-pink-300 text-black",
     fodder: "bg-blue-300 text-black",
@@ -279,6 +281,7 @@ export default function ClueInput({ clue }: ClueInputProps) {
                   value={letter}
                   onChange={(e) => handleChange(e, wIndex, i)}
                   onKeyDown={(e) => handleKeyDown(e, wIndex, i)}
+                  onClick={() => setActivePos({ w: wIndex, i })}
                   className={`w-10 h-10 text-center text-black border-r border-gray-400 focus:outline-none text-lg font-medium caret-transparent ${
                     activePos.w === wIndex && activePos.i === i
                       ? "bg-blue-300 border-blue-300"
