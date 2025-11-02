@@ -15,8 +15,11 @@ export default function ClueInput({ clue }: ClueInputProps) {
     Set<"indicator" | "fodder" | "definition">
   >(new Set());
   const [showHintPopup, setShowHintPopup] = useState(false);
+  const [showExplanationPopup, setShowExplanationPopup] = useState(false);
+  const [currentExplanationType, setCurrentExplanationType] = useState<"indicator" | "fodder" | "definition" | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
   const [activePos, setActivePos] = useState<{ w: number; i: number }>({ w: 0, i: 0 });
   
 
@@ -222,15 +225,32 @@ export default function ClueInput({ clue }: ClueInputProps) {
     const correct = normalize(answer) === normalize(clue.solution);
     setIsCorrect(correct);
     setShowResult(true);
+
+    if (!correct) {
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+    }
   };
 
   const toggleHint = (hint: "indicator" | "fodder" | "definition") => {
     setRevealedHints((prev) => new Set(prev).add(hint));
     setShowHintPopup(false);
+    setCurrentExplanationType(hint);
+    setShowExplanationPopup(true);
   };
 
   return (
     <div className="min-h-screen bg-purple-200">
+        <style>{`
+          @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+          }
+          .animate-shake {
+            animation: shake 0.5s;
+          }
+      `}</style>
       {/* Center the clue horizontally */}
       <div className="flex justify-center mb-10">
         <div className="bg-white p-6 rounded-lg shadow-md max-w-2xl w-full text-center">
@@ -241,7 +261,7 @@ export default function ClueInput({ clue }: ClueInputProps) {
       </div>
 
       <div className="flex flex-col items-center gap-5">
-        <div className="flex gap-5">
+        <div className={`flex gap-5 ${isShaking ? 'animate-shake' : ''}`}>
           {letters.map((word, wIndex) => (
             <div
               key={wIndex}
@@ -288,17 +308,16 @@ export default function ClueInput({ clue }: ClueInputProps) {
         </div>
       </div>
 
-      {/* Hint Popup */}
       {showHintPopup && (
         <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg relative w-80 text-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg relative w-80">
             <button
               className="absolute top-2 right-2 text-gray-500 hover:text-black"
               onClick={() => setShowHintPopup(false)}
             >
               ✕
             </button>
-            <h3 className="text-lg font-semibold mb-4">Reveal a hint</h3>
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">Hints</h3>
             {(["indicator", "fodder", "definition"] as const).map((hint) => (
               <button
                 key={hint}
@@ -308,6 +327,26 @@ export default function ClueInput({ clue }: ClueInputProps) {
                 Reveal {hint}
               </button>
             ))}
+          </div>
+        </div>
+      )}
+
+            {/* Explanation Popup */}
+      {showExplanationPopup && currentExplanationType && (
+        <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg relative w-96">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-black"
+              onClick={() => setShowExplanationPopup(false)}
+            >
+              ✕
+            </button>
+            <h3 className="text-lg font-semibold text-gray-700 mb-4 capitalize">
+              {currentExplanationType}
+            </h3>
+            <p className="text-gray-700">
+              {clue.explanation[currentExplanationType]}
+            </p>
           </div>
         </div>
       )}

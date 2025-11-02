@@ -34,11 +34,11 @@ export const puzzles: Puzzle[] = [
         fodder: ["dance"],
         definition: "joy in your brain",
         explanation: {
-          indicator: "The indicator in this clue is 'jumping around', which suggests an anagram.",
-          fodder: "The word 'dance' is the fodder in this clue that we'll use to construct our answer, as guided by the indicator",
-          definition: "Our definition here is 'joy in your brain', which is a fun way to describe our answer"
+          indicator: "The indicator in this clue is 'jumping around', which suggests that we must find an anagram for the fodder.",
+          fodder: "The word 'dance' is the fodder in this clue that we'll use to construct our answer, as guided by the indicator(s).",
+          definition: "Our definition here is 'joy in your brain', which is a fun way to describe our answer."
         },
-        videoUrl: "https://www.youtube.com/watch?v=-DXvOGMsWwo",
+        videoUrl: "https://www.youtube.com/embed/-DXvOGMsWwo",
       }
     ]
   },
@@ -48,18 +48,18 @@ export const puzzles: Puzzle[] = [
     author: "Fredrick Emula",
     clues: [
       {
-        id: "1-1",
+        id: "1-2",
         text: "Odd Joe Rae, muy inteligente pero Niko es una mujer más inteligente (5)",
         solution: "JEREMY",
         indicator: ["odd"],
         fodder: ["Joe", "Rae", "muy"],
         definition: "inteligente pero Niko es una mujer más inteligente",
         explanation: {
-          indicator: "The indicator in this clue is 'odd', which suggests we take the odd letters from the fodder.",
-          fodder: "The word 'dance' is the fodder in this clue that we'll use to construct our answer, as guided by the indicator",
-          definition: "Our definition here is 'joy in your brain', which is a fun way to describe our answer"
+          indicator: "The indicator in this clue is 'odd', which suggests that we must select certain letters of the fodder.",
+          fodder: "The words 'Joe', 'Rae', and 'muy' are the fodder in this clue from which we will grab letters to form our answer, as guided by the indicator(s).",
+          definition: "Our definition is 'muy inteligente pero Niko es una mujer más inteligente', which translates to 'very intelligent but Niko is a more intelligent woman'. This is a playful description of our answer."
         },
-        videoUrl: "https://www.youtube.com/watch?v=-DXvOGMsWwo",
+        videoUrl: "https://www.youtube.com/embed/-DXvOGMsWwo",
       }
     ]
   },
@@ -69,18 +69,18 @@ export const puzzles: Puzzle[] = [
     author: "Fredrick Emula",
     clues: [
       {
-        id: "1-1",
+        id: "1-3",
         text: "Youthful pop group mangles disk after hiding in \n East Raymondtown (5, 4)",
         solution: "STRAY KIDS",
         indicator: ["mangles", "after", "hiding in"],
         fodder: ["disk", "East Raymondtown"],
         definition: "Youthful pop group",
         explanation: {
-          indicator: "The indicator in this clue is 'jumping around', which suggests an anagram.",
-          fodder: "The word 'dance' is the fodder in this clue that we'll use to construct our answer, as guided by the indicator",
-          definition: "Our definition here is 'joy in your brain', which is a fun way to describe our answer"
+          indicator: "The indicators in this clue are 'mangles', 'after', and 'hiding in'. One tells us to anagram some fodder, another tells us to extract some letters within some fodder, and the third explains how they are positioned.",
+          fodder: "The words 'disk' and 'East Raymondtown' are the fodder. We will need to manipulate these words and extract letters from them to get the answer, guided by the indicator(s).",
+          definition: "Our definition here is 'Youthful pop group', which is a general description of our answer."
         },
-        videoUrl: "https://www.youtube.com/watch?v=-DXvOGMsWwo",
+        videoUrl: "https://www.youtube.com/embed/-DXvOGMsWwo",
         nowrapSequences: ["East Raymondtown"]
       }
     ]
@@ -91,18 +91,18 @@ export const puzzles: Puzzle[] = [
     author: "Fredrick Emula",
     clues: [
       {
-        id: "1-1",
+        id: "1-4",
         text: "Catholic Church ends after even Ezra is not a butt toucher (4)",
         solution: "ZACH",
         indicator: ["ends", "after", "even"],
-        fodder: ["Catholic Church", "Ezra"],
+        fodder: ["Catholic", "Church", "Ezra"],
         definition: "is not a butt toucher",
         explanation: {
-          indicator: "The indicator in this clue is 'jumping around', which suggests an anagram.",
-          fodder: "The word 'dance' is the fodder in this clue that we'll use to construct our answer, as guided by the indicator",
-          definition: "Our definition here is 'joy in your brain', which is a fun way to describe our answer"
+          indicator: "The indicators in this clue are 'ends', 'after', and 'even'. Two will be used to select specific letters from the fodder, while the other gives information about how those letters should be ordered.",
+          fodder: "The words 'Catholic', 'Church', and 'Ezra' are the fodder in this clue. We will need letters from each of them to form our answer.",
+          definition: "Our definition here is 'is not a butt toucher', which refers to a memorable description of our answer."
         },
-        videoUrl: "https://www.youtube.com/watch?v=-DXvOGMsWwo",
+        videoUrl: "https://www.youtube.com/embed/-DXvOGMsWwo",
       }
     ]
   }
