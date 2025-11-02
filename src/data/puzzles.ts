@@ -49,7 +49,7 @@ export const puzzles: Puzzle[] = [
     clues: [
       {
         id: "1-2",
-        text: "Odd Joe Rae, muy inteligente pero Niko es una mujer más inteligente (5)",
+        text: "Odd Joe Rae, muy inteligente pero Niko es una mujer más inteligente (6)",
         solution: "JEREMY",
         indicator: ["odd"],
         fodder: ["Joe", "Rae", "muy"],
