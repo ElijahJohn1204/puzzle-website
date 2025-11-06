@@ -105,5 +105,26 @@ export const puzzles: Puzzle[] = [
         videoUrl: "https://www.youtube.com/embed/Wdng4IUnkS4",
       }
     ]
+  },
+  { 
+    id: "5",
+    title: "AARP",
+    author: "Fredrick Emula",
+    clues: [
+      {
+        id: "1-5",
+        text: "AARP's leader followed by fearless mixed-up Aiden Farr, a nincompoop (6)",
+        solution: "ADRIAN",
+        indicator: ["leader", "followed by", "fearless", "mixed-up"],
+        fodder: ["AARP", "Aiden Farr"],
+        definition: "a nincompoop",
+        explanation: {
+          indicator: "The indicators in this clue are 'leader', 'followed by', 'fearless', and 'mixed-up'. One is used to select specific letters from fodder, another tells you to remove some letters from fodder, a third tells you to anagram the fodder, and the other one gives information about the positioning.",
+          fodder: "The words 'AARP' and 'Aiden Farr' are the fodder in this clue. We will need letters from each of them to form our answer.",
+          definition: "'a nincompoop', which refers to a basic description of our answer."
+        },
+        videoUrl: "",
+      }
+    ]
   }
 ];
