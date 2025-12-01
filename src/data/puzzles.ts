@@ -126,5 +126,26 @@ export const puzzles: Puzzle[] = [
         videoUrl: "",
       }
     ]
+  },
+  { 
+    id: "6",
+    title: "Voyager Abe",
+    author: "Fredrick Emula + Nathan Santoso",
+    clues: [
+      {
+        id: "1-6",
+        text: "\"Kneel!\" said ageless, confused Voyager Abe, also known as God's beautiful, bearded boy. (4, 7)",
+        solution: "NEAL OVERBAY",
+        indicator: ["said", "ageless", "confused"],
+        fodder: ["Kneel", "Voyager Abe"],
+        definition: "also known as God's beautiful, bearded boy",
+        explanation: {
+          indicator: "The indicators in this clue are 'said', 'ageless', and 'confused'. One indicates a homophone, another tells you to anagram adjacent fodder, and the other suggests that you delete some letters from the fodder.",
+          fodder: "The words 'Kneel' and 'Voyager Abe' are the fodder in this clue. We will need to manipulate these words according to the indicator(s) to get the answer.",
+          definition: "'also known as God's beautiful, bearded boy', which is a general description of our answer."
+        },
+        videoUrl: "",
+      }
+    ]
   }
 ];
